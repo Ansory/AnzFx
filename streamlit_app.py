@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 
 # --- KONFIGURASI BOT ---
-TOKEN = "8348453058:AAHlGgxkPjLX_GwPuvUzXlsLqKzoMHEJAsM"
+# Masukkan TOKEN BARU hasil 'Revoke' tadi di sini
+TOKEN = "8348453058:AAEdjA6d9YQSo1qriElIm5Ll9lD0m7N_h-0"
 CHAT_ID = "913800755"
 
 # --- TAMPILAN APLIKASI ---
@@ -29,26 +30,20 @@ if submit:
     status_text = "MARKET_ORDER" if order_type == "Order Now (Market)" else "LIMIT_ORDER"
     entry_final = "NOW" if order_type == "Order Now (Market)" else entry
 
-    # Susun Pesan
-    pesan = (
-        f"⚠️ **COMMAND: {status_text}** ⚠️\n\n"
-        f"Symbol: {pair}\n"
-        f"Action: {side}\n"
-        f"Entry: {entry_final}\n"
-        f"TP 1: {tp1}\n"
-    )
+    # Susun Pesan Singkat & Padat
+    pesan = f"⚠️ **{status_text}** ⚠️\n\n"
+    pesan += f"Symbol: {pair}\nAction: {side}\nEntry: {entry_final}\n"
+    pesan += f"TP 1: {tp1}\n"
     if tp2.strip():
         pesan += f"TP 2: {tp2}\n"
     pesan += f"SL: {sl}"
 
     # Kirim ke Telegram
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": pesan, "parse_mode": "Markdown"}
-    
     try:
-        res = requests.post(url, json=payload)
+        res = requests.post(url, json={"chat_id": CHAT_ID, "text": pesan, "parse_mode": "Markdown"})
         if res.status_code == 200:
-            st.success("🚀 Berhasil Dikirim ke Telegram Salsa!")
+            st.success("🚀 Sinyal Berhasil Terkirim!")
             st.balloons()
         else:
             st.error(f"❌ Telegram Menolak: {res.text}")
