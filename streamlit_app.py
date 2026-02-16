@@ -9,6 +9,7 @@ def kirim_telegram(pesan):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": pesan, "parse_mode": "Markdown"}
     try:
+        # Mengirim data ke Telegram
         response = requests.post(url, data=data)
         return response
     except Exception as e:
@@ -30,6 +31,7 @@ with st.form("signal_form"):
         tp1 = st.text_input("💰 Take Profit 1")
     with col_tp2:
         tp2 = st.text_input("💰 Take Profit 2 (Opsional)")
+        
     sl = st.text_input("🛑 Stop Loss")
     
     submit = st.form_submit_button("KIRIM PERINTAH SEKARANG")
@@ -38,6 +40,7 @@ if submit:
     status_text = "MARKET_ORDER" if order_type == "Order Now (Market)" else "LIMIT_ORDER"
     entry_final = "NOW" if order_type == "Order Now (Market)" else entry
 
+    # Menyusun pesan
     garis_pesan = [
         f"⚠️ **COMMAND: {status_text}** ⚠️",
         "",
@@ -53,10 +56,11 @@ if submit:
     garis_pesan.append(f"SL: {sl}")
     pesan_final = "\n".join(garis_pesan)
     
+    # Eksekusi fungsi kirim
     res = kirim_telegram(pesan_final)
     
     if res and res.status_code == 200:
         st.success(f"🚀 Perintah {status_text} Berhasil Dikirim!")
         st.balloons()
     else:
-        st.error("❌ Gagal mengirim! Coba cek koneksi atau Token.")
+        st.error("❌ Gagal mengirim! Pastikan bot sudah di-START di Telegram.")
