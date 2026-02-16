@@ -1,4 +1,1 @@
-streamlit
 requests
-python-binance
-telethonrequests
