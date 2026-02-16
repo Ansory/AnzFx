@@ -2,17 +2,23 @@ import streamlit as st
 import requests
 
 # --- KONFIGURASI BOT ---
+# Masukkan data asli kamu di sini
 TOKEN = "8348453058:AAHlGgxkPjLX_GwPuvUzXIsLqKzoMHEJAsM"
 CHAT_ID = "913800755"
 
 def kirim_telegram(pesan):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": pesan, "parse_mode": "Markdown"}
-    return requests.post(url, data=data)
+    try:
+        response = requests.post(url, data=data)
+        return response
+    except Exception as e:
+        return None
 
 # --- TAMPILAN APLIKASI ---
-st.set_page_config(page_title="AnzFx Controller", page_icon="🎮", layout="centered")
+st.set_page_config(page_title="AnzFx Controller", page_icon="🎮")
 st.title("🎮 AnzFx Signal Controller")
+st.write("Kirim perintah trading langsung ke Telegram")
 
 with st.form("signal_form"):
     pair = st.text_input("🪙 Pair", value="XAUUSD").upper()
@@ -20,7 +26,7 @@ with st.form("signal_form"):
     
     order_type = st.radio("🛠️ Order Method", ["Order Now (Market)", "Order Limit"])
     
-    # Hanya input Entry Price saja
+    # Input Entry Price
     entry = st.text_input("🎯 Entry Price", value="0")
         
     st.markdown("---")
@@ -39,7 +45,7 @@ if submit:
     status_text = "MARKET_ORDER" if order_type == "Order Now (Market)" else "LIMIT_ORDER"
     entry_final = "NOW" if order_type == "Order Now (Market)" else entry
 
-    # Menyusun pesan tanpa baris Qty/Lot
+    # Menyusun pesan secara dinamis (Hanya baris yang diisi yang muncul)
     garis_pesan = [
         f"⚠️ **COMMAND: {status_text}** ⚠️",
         "",
@@ -49,16 +55,20 @@ if submit:
         f"TP 1: {tp1}"
     ]
     
-    if tp2:
+    # Tambahkan TP 2 hanya jika ada isinya
+    if tp2.strip():
         garis_pesan.append(f"TP 2: {tp2}")
         
     garis_pesan.append(f"SL: {sl}")
     
     pesan_final = "\n".join(garis_pesan)
     
+    # Proses Pengiriman
     res = kirim_telegram(pesan_final)
-    if res.status_code == 200:
+    
+    if res and res.status_code == 200:
         st.success(f"🚀 Perintah {status_text} Berhasil Dikirim!")
         st.balloons()
     else:
-        st.error(f"❌ Gagal! Periksa Token/Chat ID.")
+        error_msg = res.text if res else "Koneksi Gagal"
+        st.error(f"❌ Gagal! Pastikan Token/ID Benar. Detail: {error_msg}")
