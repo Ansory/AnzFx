@@ -19,7 +19,7 @@ MY_CHAT_ID = "913800755"
 
 # --- 2. INISIALISASI ---
 t_client = TelegramClient('anzfx_userbot', API_ID, API_HASH)
-#b_client = Client(BINANCE_KEY, BINANCE_SECRET)
+b_client = Client(BINANCE_KEY, BINANCE_SECRET)
 
 print("✅ Bot Pemantau Sedang Berjalan...")
 
