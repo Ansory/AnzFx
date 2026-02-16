@@ -1,51 +1,49 @@
 import streamlit as st
 import requests
 
-# --- KONFIGURASI BOT ---
-# Masukkan TOKEN BARU hasil 'Revoke' tadi di sini
+# --- 1. PENGATURAN BOT ---
+# Pastikan Anda sudah 'Revoke Token' di BotFather untuk mendapatkan Token baru yang segar
 TOKEN = "8348453058:AAEdjA6d9YQSo1qriElIm5Ll9lD0m7N_h-0"
 CHAT_ID = "913800755"
 
-# --- TAMPILAN APLIKASI ---
-st.set_page_config(page_title="AnzFx Controller", page_icon="🎮")
-st.title("🎮 AnzFx Signal Controller")
+# --- 2. TAMPILAN WEB ---
+st.set_page_config(page_title="AnzFx Signal", page_icon="📈")
+st.title("🚀 AnzFx Signal Center")
 
-with st.form("signal_form"):
+# Form Input
+with st.form("main_form"):
     pair = st.text_input("🪙 Pair", value="XAUUSD").upper()
     side = st.selectbox("⚡ Side", ["BUY", "SELL"])
-    order_type = st.radio("🛠️ Order Method", ["Order Now (Market)", "Order Limit"])
+    order = st.radio("🛠️ Type", ["Market Order", "Limit Order"])
     entry = st.text_input("🎯 Entry Price", value="0")
     
-    st.markdown("---")
-    col_tp1, col_tp2 = st.columns(2)
-    with col_tp1:
-        tp1 = st.text_input("💰 Take Profit 1")
-    with col_tp2:
-        tp2 = st.text_input("💰 Take Profit 2 (Opsional)")
+    col1, col2 = st.columns(2)
+    tp1 = col1.text_input("💰 TP 1")
+    tp2 = col2.text_input("💰 TP 2 (Opsional)")
+    
     sl = st.text_input("🛑 Stop Loss")
     
-    submit = st.form_submit_button("KIRIM PERINTAH SEKARANG")
+    tombol = st.form_submit_button("KIRIM SINYAL")
 
-if submit:
-    status_text = "MARKET_ORDER" if order_type == "Order Now (Market)" else "LIMIT_ORDER"
-    entry_final = "NOW" if order_type == "Order Now (Market)" else entry
-
-    # Susun Pesan Singkat & Padat
-    pesan = f"⚠️ **{status_text}** ⚠️\n\n"
-    pesan += f"Symbol: {pair}\nAction: {side}\nEntry: {entry_final}\n"
-    pesan += f"TP 1: {tp1}\n"
+# --- 3. LOGIKA PENGIRIMAN ---
+if tombol:
+    # Susun teks pesan
+    txt = f"⚠️ **{order.upper()}** ⚠️\n\n"
+    txt += f"Symbol: {pair}\nAction: {side}\nEntry: {entry}\n"
+    txt += f"TP 1: {tp1}\n"
     if tp2.strip():
-        pesan += f"TP 2: {tp2}\n"
-    pesan += f"SL: {sl}"
+        txt += f"TP 2: {tp2}\n"
+    txt += f"SL: {sl}"
 
-    # Kirim ke Telegram
+    # Kirim ke API Telegram
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     try:
-        res = requests.post(url, json={"chat_id": CHAT_ID, "text": pesan, "parse_mode": "Markdown"})
-        if res.status_code == 200:
-            st.success("🚀 Sinyal Berhasil Terkirim!")
+        r = requests.post(url, json={"chat_id": CHAT_ID, "text": txt, "parse_mode": "Markdown"})
+        if r.status_code == 200:
+            st.success("✅ SINYAL TERKIRIM!")
             st.balloons()
         else:
-            st.error(f"❌ Telegram Menolak: {res.text}")
+            # Menampilkan pesan error asli dari Telegram
+            st.error(f"❌ Gagal! Respons Telegram: {r.text}")
     except Exception as e:
-        st.error(f"❌ Masalah Koneksi: {e}")
+        st.error(f"❌ Error Koneksi: {e}")
